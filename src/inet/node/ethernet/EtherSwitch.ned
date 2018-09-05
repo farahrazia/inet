@@ -27,6 +27,7 @@ import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 
+
 //
 // Model of an Ethernet switch.
 //
@@ -66,19 +67,19 @@ module EtherSwitch
             @display("p=100,100;is=s");
         }
         relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
-            @display("p=400,100;is=m");
+            @display("p=800,269;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
-            @display("p=250,100");
+            @display("p=800,100");
         }
         nl: MessageDispatcher {
             parameters:
-                @display("p=800,200;b=1200,5");
+                @display("p=800,357;b=1200,5");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 mac.promiscuous = true;
-                @display("p=250,300,row,150;q=txQueue");
+                @display("p=250,470,row,150;q=txQueue");
         }
     connections:
         relayUnit.ifOut --> nl.in++;
