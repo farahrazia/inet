@@ -231,28 +231,8 @@ void Ieee8021dRelay::learn(MacAddress srcAddr, int arrivalInterfaceId)
 
 void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 {
-    const auto& bpdu = packet->peekAtFront<Bpdu>();
-    (void)bpdu;       // unused variable
     unsigned int portNum = packet->getTag<InterfaceReq>()->getInterfaceId();
-    MacAddress address = packet->getTag<MacAddressReq>()->getDestAddress();
-
-    if (ifTable->getInterfaceById(portNum) == nullptr)
-        throw cRuntimeError("Output port %d doesn't exist!", portNum);
-
-    // use LLCFrame
-    const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
-    llcHeader->setSsap(0x42);
-    llcHeader->setDsap(0x42);
-    llcHeader->setControl(3);
-    packet->insertAtFront(llcHeader);
-    const auto& header = makeShared<EthernetMacHeader>();
-    header->setSrc(bridgeAddress);
-    header->setDest(address);
-    header->setTypeOrLength(packet->getByteLength());
-    packet->insertAtFront(header);
-
-    EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    const auto& header = packet->peekAtFront<EthernetMacHeader>();
 
     EV_INFO << "Sending BPDU frame " << packet << " with destination = " << header->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;
@@ -262,15 +242,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 
 void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
-    auto eth = EtherEncap::decapsulateMacHeader(packet);
-    ASSERT(isIeee8023Header(*eth));
-
-    const auto& llc = packet->popAtFront<Ieee8022LlcHeader>();
-    ASSERT(llc->getSsap() == 0x42 && llc->getDsap() == 0x42 && llc->getControl() == 3);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-    const auto& bpdu = packet->peekAtFront<Bpdu>();
-
-    EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
+    EV_INFO << "Sending BPDU frame to the STP/RSTP module" << endl;
     numDeliveredBDPUsToSTP++;
     send(packet, "stpOut");
 }
