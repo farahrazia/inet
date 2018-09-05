@@ -16,6 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
@@ -602,6 +603,7 @@ void Rstp::sendTCNtoRoot()
                 macAddressReq->setSrcAddress(bridgeAddress);
                 macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
                 packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(r);
+                packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
 
                 send(packet, "relayOut");
             }
@@ -668,6 +670,7 @@ void Rstp::sendBPDU(int interfaceId)
         macAddressReq->setSrcAddress(bridgeAddress);
         macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
 
         send(packet, "relayOut");
     }

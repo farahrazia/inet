@@ -18,6 +18,7 @@
 // Authors: ANSA Team, Benjamin Martin Seregi
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -148,6 +149,7 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
         outPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
         outPacket->addTagIfAbsent<MacAddressReq>()->setSrcAddress(srcAddress);
         outPacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddress);
+        outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
         send(outPacket, "relayOut");
     }
     delete packet;
@@ -159,6 +161,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     const auto& bpdu = makeShared<Bpdu>();
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
 
     bpdu->setProtocolIdentifier(0);
     bpdu->setProtocolVersionIdentifier(0);
@@ -208,6 +211,7 @@ void Stp::generateTCN()
 
             packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
 
             packet->insertAtBack(tcn);
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
