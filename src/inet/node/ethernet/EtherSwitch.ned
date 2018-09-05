@@ -25,6 +25,7 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
+import inet.linklayer.ethernet.IEtherEncap;
 import inet.networklayer.common.InterfaceTable;
 
 
@@ -69,6 +70,10 @@ module EtherSwitch
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
             @display("p=800,100");
         }
+        encap: <default("EtherEncap")> like IEtherEncap if spanningTreeProtocol != "" {
+            parameters:
+                @display("p=800,184");
+        }
         relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
             @display("p=800,269;is=m");
         }
@@ -91,8 +96,10 @@ module EtherSwitch
         }
 
         if spanningTreeProtocol != "" {
-            stp.relayIn <-- relayUnit.stpOut;
-            stp.relayOut --> relayUnit.stpIn;
+            stp.relayIn <-- encap.upperLayerOut;
+            stp.relayOut --> encap.upperLayerIn;
+            encap.lowerLayerIn <-- relayUnit.stpOut;
+            encap.lowerLayerOut --> relayUnit.stpIn;
         }
 }
 
