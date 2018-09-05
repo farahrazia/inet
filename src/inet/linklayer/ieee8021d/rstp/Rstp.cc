@@ -599,10 +599,10 @@ void Rstp::sendTCNtoRoot()
 
                 packet->insertAtBack(frame);
 
-                auto macAddressReq = packet->addTagIfAbsent<MacAddressReq>();
+                auto macAddressReq = packet->addTag<MacAddressReq>();
                 macAddressReq->setSrcAddress(bridgeAddress);
                 macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(r);
+                packet->addTag<InterfaceReq>()->setInterfaceId(r);
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
 
                 send(packet, "relayOut");
@@ -666,10 +666,10 @@ void Rstp::sendBPDU(int interfaceId)
 
         packet->insertAtBack(frame);
 
-        auto macAddressReq = packet->addTagIfAbsent<MacAddressReq>();
+        auto macAddressReq = packet->addTag<MacAddressReq>();
         macAddressReq->setSrcAddress(bridgeAddress);
         macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+        packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
 
         send(packet, "relayOut");

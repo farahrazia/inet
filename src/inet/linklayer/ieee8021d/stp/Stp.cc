@@ -146,9 +146,10 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
     if (!isRoot) {
         Packet *outPacket = new Packet(packet->getName());
         outPacket->insertAtBack(tcn);
-        outPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
-        outPacket->addTagIfAbsent<MacAddressReq>()->setSrcAddress(srcAddress);
-        outPacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddress);
+        outPacket->addTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+        auto macAddressReq = outPacket->addTag<MacAddressReq>();
+        macAddressReq->setSrcAddress(srcAddress);
+        macAddressReq->setDestAddress(destAddress);
         outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
         send(outPacket, "relayOut");
     }
@@ -159,8 +160,8 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
 {
     Packet *packet = new Packet("BPDU");
     const auto& bpdu = makeShared<Bpdu>();
-    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
-    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    packet->addTag<MacAddressReq>()->setDestAddress(address);
+    packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
 
     bpdu->setProtocolIdentifier(0);
@@ -209,8 +210,8 @@ void Stp::generateTCN()
             // 1 if Topology Change Notification BPDU
             tcn->setBpduType(1);
 
-            packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+            packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
+            packet->addTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
             packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
 
             packet->insertAtBack(tcn);
