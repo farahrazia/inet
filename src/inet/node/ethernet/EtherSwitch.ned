@@ -66,11 +66,11 @@ module EtherSwitch
         macTable: <default("MacAddressTable")> like IMacAddressTable {
             @display("p=100,100;is=s");
         }
-        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
-            @display("p=800,269;is=m");
-        }
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
             @display("p=800,100");
+        }
+        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
+            @display("p=800,269;is=m");
         }
         nl: MessageDispatcher {
             parameters:
